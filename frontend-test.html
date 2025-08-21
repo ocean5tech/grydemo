@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GRY Demo - 前端测试页面</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .api-section {
+            background: white;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .api-title {
+            color: #333;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 10px;
+        }
+        .btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        .btn:hover {
+            background: #5a6fd8;
+        }
+        .result {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 5px;
+            padding: 15px;
+            margin-top: 10px;
+            font-family: monospace;
+            white-space: pre-wrap;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .success {
+            border-color: #28a745;
+            background-color: #d4edda;
+        }
+        .error {
+            border-color: #dc3545;
+            background-color: #f8d7da;
+        }
+        .input-group {
+            margin: 10px 0;
+        }
+        .input-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        .input-group input, .input-group textarea {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        .status {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 3px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        .status.online {
+            background: #d4edda;
+            color: #155724;
+        }
+        .status.offline {
+            background: #f8d7da;
+            color: #721c24;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🚀 GRY Demo - 全栈演示应用</h1>
+        <p>3层架构 Spring Boot + React + Kafka 完整实现</p>
+        <p>后端服务状态: <span id="backendStatus" class="status offline">检测中...</span></p>
+    </div>
+
+    <div class="api-section">
+        <h2 class="api-title">📊 系统状态检查</h2>
+        <button class="btn" onclick="checkHealth()">检查后端健康状态</button>
+        <div id="healthResult" class="result" style="display:none;"></div>
+    </div>
+
+    <div class="api-section">
+        <h2 class="api-title">👥 API 1: 获取用户信息 (GET)</h2>
+        <div class="input-group">
+            <label>用户ID:</label>
+            <input type="number" id="userId" value="1" min="1">
+        </div>
+        <button class="btn" onclick="getUser()">获取用户信息</button>
+        <div id="userResult" class="result" style="display:none;"></div>
+    </div>
+
+    <div class="api-section">
+        <h2 class="api-title">📦 API 2: 创建产品 (POST)</h2>
+        <div class="input-group">
+            <label>产品名称:</label>
+            <input type="text" id="productName" value="测试产品">
+        </div>
+        <div class="input-group">
+            <label>产品描述:</label>
+            <input type="text" id="productDesc" value="这是一个测试产品">
+        </div>
+        <div class="input-group">
+            <label>价格:</label>
+            <input type="number" id="productPrice" value="99.99" step="0.01">
+        </div>
+        <div class="input-group">
+            <label>库存数量:</label>
+            <input type="number" id="productStock" value="10">
+        </div>
+        <button class="btn" onclick="createProduct()">创建产品</button>
+        <div id="createProductResult" class="result" style="display:none;"></div>
+    </div>
+
+    <div class="api-section">
+        <h2 class="api-title">✏️ API 3: 更新产品 (PUT)</h2>
+        <div class="input-group">
+            <label>产品ID:</label>
+            <input type="number" id="updateProductId" value="1" min="1">
+        </div>
+        <div class="input-group">
+            <label>新产品名称:</label>
+            <input type="text" id="updateProductName" value="更新后的产品">
+        </div>
+        <div class="input-group">
+            <label>新产品描述:</label>
+            <input type="text" id="updateProductDesc" value="更新后的描述">
+        </div>
+        <div class="input-group">
+            <label>新价格:</label>
+            <input type="number" id="updateProductPrice" value="199.99" step="0.01">
+        </div>
+        <div class="input-group">
+            <label>新库存数量:</label>
+            <input type="number" id="updateProductStock" value="20">
+        </div>
+        <button class="btn" onclick="updateProduct()">更新产品</button>
+        <div id="updateProductResult" class="result" style="display:none;"></div>
+    </div>
+
+    <div class="api-section">
+        <h2 class="api-title">🗑️ API 4: 删除产品 (DELETE)</h2>
+        <div class="input-group">
+            <label>要删除的产品ID:</label>
+            <input type="number" id="deleteProductId" value="3" min="1">
+        </div>
+        <button class="btn" onclick="deleteProduct()">删除产品</button>
+        <div id="deleteProductResult" class="result" style="display:none;"></div>
+    </div>
+
+    <div class="api-section">
+        <h2 class="api-title">🔗 API 5: 多表关联查询用户订单 (JOIN)</h2>
+        <div class="input-group">
+            <label>用户ID:</label>
+            <input type="number" id="orderUserId" value="1" min="1">
+        </div>
+        <button class="btn" onclick="getUserOrders()">查询用户订单</button>
+        <div id="userOrdersResult" class="result" style="display:none;"></div>
+    </div>
+
+    <div class="api-section">
+        <h2 class="api-title">📋 其他功能测试</h2>
+        <button class="btn" onclick="getAllUsers()">获取所有用户</button>
+        <button class="btn" onclick="getAllProducts()">获取所有产品</button>
+        <button class="btn" onclick="getAllOrders()">获取所有订单</button>
+        <div id="otherResult" class="result" style="display:none;"></div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:8080';
+
+        // 检查后端服务状态
+        async function checkBackendStatus() {
+            try {
+                const response = await fetch(`${API_BASE}/actuator/health`);
+                if (response.ok) {
+                    document.getElementById('backendStatus').className = 'status online';
+                    document.getElementById('backendStatus').textContent = '在线';
+                    return true;
+                }
+            } catch (error) {
+                console.log('Backend not available:', error);
+            }
+            document.getElementById('backendStatus').className = 'status offline';
+            document.getElementById('backendStatus').textContent = '离线';
+            return false;
+        }
+
+        // 页面加载时检查状态
+        window.onload = function() {
+            checkBackendStatus();
+        };
+
+        async function makeRequest(url, options = {}) {
+            try {
+                const response = await fetch(`${API_BASE}${url}`, {
+                    ...options,
+                    headers: {
+                        'Content-Type': 'application/json',
+                        ...options.headers
+                    }
+                });
+                
+                const data = await response.text();
+                let jsonData;
+                try {
+                    jsonData = JSON.parse(data);
+                } catch {
+                    jsonData = data;
+                }
+
+                return {
+                    status: response.status,
+                    ok: response.ok,
+                    data: jsonData
+                };
+            } catch (error) {
+                return {
+                    status: 0,
+                    ok: false,
+                    error: error.message
+                };
+            }
+        }
+
+        function showResult(elementId, result) {
+            const element = document.getElementById(elementId);
+            element.style.display = 'block';
+            
+            if (result.ok) {
+                element.className = 'result success';
+                element.textContent = `✅ 请求成功 (${result.status})\n\n` + JSON.stringify(result.data, null, 2);
+            } else {
+                element.className = 'result error';
+                if (result.error) {
+                    element.textContent = `❌ 网络错误: ${result.error}`;
+                } else {
+                    element.textContent = `❌ 请求失败 (${result.status})\n\n` + JSON.stringify(result.data, null, 2);
+                }
+            }
+        }
+
+        async function checkHealth() {
+            const result = await makeRequest('/actuator/health');
+            showResult('healthResult', result);
+            checkBackendStatus();
+        }
+
+        async function getUser() {
+            const userId = document.getElementById('userId').value;
+            const result = await makeRequest(`/api/users/${userId}`);
+            showResult('userResult', result);
+        }
+
+        async function createProduct() {
+            const data = {
+                name: document.getElementById('productName').value,
+                description: document.getElementById('productDesc').value,
+                price: parseFloat(document.getElementById('productPrice').value),
+                stockQuantity: parseInt(document.getElementById('productStock').value)
+            };
+            
+            const result = await makeRequest('/api/products', {
+                method: 'POST',
+                body: JSON.stringify(data)
+            });
+            showResult('createProductResult', result);
+        }
+
+        async function updateProduct() {
+            const id = document.getElementById('updateProductId').value;
+            const data = {
+                name: document.getElementById('updateProductName').value,
+                description: document.getElementById('updateProductDesc').value,
+                price: parseFloat(document.getElementById('updateProductPrice').value),
+                stockQuantity: parseInt(document.getElementById('updateProductStock').value)
+            };
+            
+            const result = await makeRequest(`/api/products/${id}`, {
+                method: 'PUT',
+                body: JSON.stringify(data)
+            });
+            showResult('updateProductResult', result);
+        }
+
+        async function deleteProduct() {
+            const id = document.getElementById('deleteProductId').value;
+            const result = await makeRequest(`/api/products/${id}`, {
+                method: 'DELETE'
+            });
+            showResult('deleteProductResult', result);
+        }
+
+        async function getUserOrders() {
+            const userId = document.getElementById('orderUserId').value;
+            const result = await makeRequest(`/api/orders/user/${userId}`);
+            showResult('userOrdersResult', result);
+        }
+
+        async function getAllUsers() {
+            const result = await makeRequest('/api/users');
+            showResult('otherResult', result);
+        }
+
+        async function getAllProducts() {
+            const result = await makeRequest('/api/products');
+            showResult('otherResult', result);
+        }
+
+        async function getAllOrders() {
+            const result = await makeRequest('/api/orders');
+            showResult('otherResult', result);
+        }
+    </script>
+</body>
+</html>
